@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-
+// Function runs simulation based on monte carlo methods
 double run_simulation(double length,double omega,double mu,int N,unsigned seed)
 {
     mt19937 engine(seed);
