@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(include)
 
-add_library(simulation_lib src/simulation.cpp)
+
+add_library(simulation_lib src/simulation.cpp src/thread_pool.cpp)
 
 add_executable(mc_transport src/main.cpp)
 target_link_libraries(mc_transport PRIVATE simulation_lib)
