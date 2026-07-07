@@ -1,6 +1,7 @@
 #include <random>
 #include <cmath>
 #include <iostream>
+#include <thread_pool.h>
 using namespace std;
 
 // Function runs simulation based on monte carlo
@@ -39,3 +40,5 @@ double run_simulation(double length,double omega,double mu,int N,unsigned seed)
 
     return transmitted/N;
 }
+
+

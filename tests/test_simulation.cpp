@@ -70,3 +70,69 @@ TEST(ThreadPoolTest, ParallelResultMatchesAnalyticalFormula) {
     double expected = std::exp(-mu * length * (1 - omega));
     EXPECT_NEAR(simulated, expected, 0.01);
 }
+
+
+
+
+#include "shower.h"
+#include <atomic>
+
+TEST(ShowerTest, EnergyConservedThinSlabFewSplits) {
+    double length = 0.5;
+    double mu = 1.0;
+    double omega = 0.5;
+    double energy_cutoff = 1.0;
+    double initial_energy = 100.0;
+    unsigned root_seed = 999;
+    int num_threads = 4;
+
+    double total_energy_out = 0.0;
+    std::mutex result_mutex;
+    std::atomic<int> transmitted_count{0};
+    std::atomic<int> absorbed_count{0};
+    std::atomic<int> scattered_count{0};
+    std::atomic<int> split_count{0};
+
+    ThreadPool pool(num_threads);
+    pool.submit([&]() {
+        simulate_particle(initial_energy, 0.0, root_seed, length, mu, omega, energy_cutoff,
+                           pool, total_energy_out, result_mutex,
+                           transmitted_count, absorbed_count, scattered_count, split_count);
+    });
+    pool.wait_all();
+
+    EXPECT_NEAR(total_energy_out, initial_energy, 1e-6);
+}
+
+TEST(ShowerTest, EnergyConservedThickSlabManySplits) {
+    double length = 5.0;
+    double mu = 1.0;
+    double omega = 0.5;
+    double energy_cutoff = 1.0;
+    double initial_energy = 100.0;
+    unsigned root_seed = 999;
+    int num_threads = 4;
+
+    double total_energy_out = 0.0;
+    std::mutex result_mutex;
+    std::atomic<int> transmitted_count{0};
+    std::atomic<int> absorbed_count{0};
+    std::atomic<int> scattered_count{0};
+    std::atomic<int> split_count{0};
+
+    ThreadPool pool(num_threads);
+    pool.submit([&]() {
+        simulate_particle(initial_energy, 0.0, root_seed, length, mu, omega, energy_cutoff,
+                           pool, total_energy_out, result_mutex,
+                           transmitted_count, absorbed_count, scattered_count, split_count);
+    });
+    pool.wait_all();
+
+    EXPECT_NEAR(total_energy_out, initial_energy, 1e-6);
+
+    // Sanity check on bookkeeping: every particle ever created either
+    // terminated (transmitted/absorbed) or is accounted for by splitting.
+    int total_particles_created = 1 + 2 * split_count.load();
+    int total_terminated = transmitted_count.load() + absorbed_count.load();
+    EXPECT_LE(total_terminated, total_particles_created);
+}

@@ -1,4 +1,5 @@
 build/
+time_profiles/
 *.o
 *.a
 *.dSYM/
