@@ -80,7 +80,7 @@ void run_part_b()
 
 int main()
 {
-    //run_part_a();
+    run_part_a();
     std::cout << std::endl;
     run_part_b();
 }
